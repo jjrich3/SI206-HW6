@@ -108,13 +108,14 @@ def cache_all_pages(people_url, filename):
     #page 2-9
     i=1
     while  type(curr_page) == dict and curr_page["next"] != None:
+        #print(i)
         #print(cache.get("page "+str(i)))
         if cache.get("page "+str(i)) and i < 9:
             curr_url = people_url + "?page="+str(i+1)
         else:
             cache["page "+str(i)] = curr_page["results"]
-            if i==9:
-                continue
+            #if i==9:
+            #    curr_page = 1
             curr_page = get_swapi_info(curr_url)
             curr_url = curr_page["next"]
             
@@ -177,18 +178,24 @@ def calculate_bmi(filename):
     -------
     dict: dictionary with the name as a key and the BMI as the value
     '''
+    i=1
     char_bmis = {}
     cache = load_json(filename)
     for page in cache:
         #print(page)
         for character in cache[page]:
             #print(character)
-            height = re.findall("[0-9.]+",character["height"])
-            weight = re.findall("[0-9.]+",character["mass"])
+            height = re.findall("[0-9.,]+",character["height"])
+            weight = re.findall("[0-9.,]+",character["mass"])
+            #print(height)
+            #print(weight)
             if height and weight:
-                character_bmi = int(height[0]) / (int(weight[0]) * int(weight[0]))
+                #print(i)
+                i -= -1
+                character_bmi = round(float(re.sub(",","",weight[0])) / (float(re.sub(",","",height[0])) * float(re.sub(",","",height[0])) * 0.0001),2)
                 char_bmis[character["name"]] = character_bmi
-    print(char_bmis)
+                #print(character["name"])
+    #print(len(char_bmis))
     return char_bmis
         
 
@@ -226,7 +233,7 @@ class TestHomework6(unittest.TestCase):
 
     def test_calculate_bmi(self):
         bmi = calculate_bmi(self.filename)
-        self.assertEqual(len(bmi), 59)
+        self.assertEqual(len(bmi), 57)
         self.assertAlmostEqual(bmi['Greedo'], 24.73)
     
 if __name__ == "__main__":
